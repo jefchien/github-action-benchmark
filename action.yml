@@ -1,4 +1,4 @@
-name: 'Continuous Benchmark'
+name: 'Continuous Benchmark (jefchien fork)'
 author: 'github-action-benchmark developers <https://github.com/benchmark-action>'
 description: 'Continuous Benchmark using GitHub pages as dash board for keeping performance'
 branding:
@@ -68,6 +68,9 @@ inputs:
     required: false
   max-items-in-chart:
     description: 'Max data points in a benchmark chart to avoid making the chart too busy. Value must be unsigned integer. No limit by default'
+    required: false
+  commit-sha:
+    description: 'The commit SHA to tag the benchmark with. If not provided, uses GitHub context.'
     required: false
 
 runs:
