@@ -54,12 +54,12 @@ function getCommitFromPullRequestPayload(pr) {
         url: `${pr.html_url}/commits/${id}`,
     };
 }
-async function getCommitFromGitHubAPIRequest(githubToken) {
+async function getCommitFromGitHubAPIRequest(githubToken, commitSha) {
     const octocat = new github.GitHub(githubToken);
     const { status, data } = await octocat.repos.getCommit({
         owner: github.context.repo.owner,
         repo: github.context.repo.repo,
-        ref: github.context.ref,
+        ref: commitSha !== null && commitSha !== void 0 ? commitSha : github.context.ref,
     });
     if (!(status === 200 || status === 304)) {
         throw new Error(`Could not fetch the head commit. Received code: ${status}`);
@@ -82,7 +82,10 @@ async function getCommitFromGitHubAPIRequest(githubToken) {
         url: data.html_url,
     };
 }
-async function getCommit(githubToken) {
+async function getCommit(githubToken, commitSha) {
+    if (commitSha && githubToken) {
+        return getCommitFromGitHubAPIRequest(githubToken, commitSha);
+    }
     if (github.context.payload.head_commit) {
         return github.context.payload.head_commit;
     }
@@ -344,7 +347,7 @@ function extractCustomBenchmarkResult(output) {
 }
 async function extractResult(config) {
     const output = await fs_1.promises.readFile(config.outputFilePath, 'utf8');
-    const { tool, githubToken } = config;
+    const { tool, githubToken, commitSha } = config;
     let benches;
     switch (tool) {
         case 'cargo':
@@ -380,7 +383,7 @@ async function extractResult(config) {
     if (benches.length === 0) {
         throw new Error(`No benchmark result was found in ${config.outputFilePath}. Benchmark output was '${output}'`);
     }
-    const commit = await getCommit(githubToken);
+    const commit = await getCommit(githubToken, commitSha);
     return {
         commit,
         date: Date.now(),

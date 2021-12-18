@@ -209,6 +209,7 @@ async function configFromJobInput() {
     let externalDataJsonPath = core.getInput('external-data-json-path');
     const maxItemsInChart = getUintInput('max-items-in-chart');
     let failThreshold = getPercentageInput('fail-threshold');
+    const commitSha = core.getInput('commit-sha') || undefined;
     validateToolType(tool);
     outputFilePath = await validateOutputFilePath(outputFilePath);
     validateGhPagesBranch(ghPagesBranch);
@@ -222,6 +223,9 @@ async function configFromJobInput() {
     }
     if (commentOnAlert) {
         validateGitHubToken('comment-on-alert', githubToken, 'to send commit comment on alert');
+    }
+    if (commitSha) {
+        validateGitHubToken('commit-sha', githubToken, 'to retrieve the commit info');
     }
     validateAlertThreshold(alertThreshold, failThreshold);
     validateAlertCommentCcUsers(alertCommentCcUsers);
@@ -248,6 +252,7 @@ async function configFromJobInput() {
         externalDataJsonPath,
         maxItemsInChart,
         failThreshold,
+        commitSha,
     };
 }
 exports.configFromJobInput = configFromJobInput;
